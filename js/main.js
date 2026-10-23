@@ -2,7 +2,7 @@
    IK INTERIORS SOLUTIONS - CLIENT SCRIPTING & INTERACTION LOGIC
    ========================================================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   initMobileNavigation();
   initStickyHeader();
   initConsultationModal();
@@ -10,7 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initPortfolioFilters();
   initForms();
   initPhoneFormatting();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 /* --------------------------------------------------------------------------
    Mobile Navigation Drawer
