@@ -1,0 +1,8 @@
+# robots.txt for IK Interiors Solutions
+# Production Domain: https://ikinteriors.in/
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://ikinteriors.in/sitemap.xml

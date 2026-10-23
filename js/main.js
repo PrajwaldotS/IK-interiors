@@ -10,6 +10,7 @@ function initApp() {
   initPortfolioFilters();
   initForms();
   initPhoneFormatting();
+  initConversionTracking();
 }
 
 if (document.readyState === 'loading') {
@@ -116,6 +117,12 @@ function initConsultationModal() {
       const phone = modalForm.querySelector('input[name="phone"]')?.value || '';
       const service = modalForm.querySelector('select[name="service"]')?.value || 'Interior Design';
       const property = modalForm.querySelector('select[name="property"]')?.value || 'Residential';
+
+      trackConversionEvent('generate_lead', {
+        event_category: 'Consultation Modal',
+        service_requested: service,
+        property_tier: property
+      });
 
       showToast(`Thank you ${name}! Our team will call you shortly.`);
       closeModal();
@@ -238,6 +245,13 @@ function initForms() {
       const budget = contactForm.querySelector('select[name="budget"]')?.value || 'Not specified';
       const message = contactForm.querySelector('textarea[name="message"]')?.value || '';
 
+      trackConversionEvent('generate_lead', {
+        event_category: 'Contact Form',
+        service_requested: service,
+        locality: location,
+        budget_bracket: budget
+      });
+
       showToast(`Thank you, ${name}! Your consultation request has been received.`);
       contactForm.reset();
 
@@ -283,3 +297,42 @@ function showToast(message) {
     toast.classList.remove('show');
   }, 4000);
 }
+
+/* --------------------------------------------------------------------------
+   Analytics & Conversion Tracking Helper (Safe GA4 / GTM / Meta hooks)
+   -------------------------------------------------------------------------- */
+function trackConversionEvent(eventName, eventParams = {}) {
+  try {
+    if (typeof gtag === 'function') {
+      gtag('event', eventName, eventParams);
+    }
+    if (window.dataLayer && Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({
+        event: eventName,
+        ...eventParams
+      });
+    }
+  } catch (err) {
+    // Non-intrusive error handling
+  }
+}
+
+function initConversionTracking() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+    const href = link.getAttribute('href') || '';
+    if (href.startsWith('tel:')) {
+      trackConversionEvent('contact', {
+        event_category: 'Phone Call',
+        event_label: href.replace('tel:', '')
+      });
+    } else if (href.includes('wa.me') || href.includes('whatsapp.com')) {
+      trackConversionEvent('contact', {
+        event_category: 'WhatsApp Click',
+        event_label: href
+      });
+    }
+  });
+}
+
